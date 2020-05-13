@@ -59,7 +59,6 @@ app.get('/api/todos', async(req, res) => {
 });
 
 app.post('/api/todos', async(req, res) => {
-  console.log(req.userId);
   const data = await client.query(`
   INSERT INTO todos (task, priority_level, user_id)
   VALUES ($1, $2, $3)
