@@ -49,11 +49,35 @@ app.get('/api/test', (req, res) => {
 const PORT = process.env.PORT || 7890;
 
 app.get('/api/todos', async(req, res) => {
-  const data = await client.query('SELECT * from todos');
+  const data = await client.query(`
+  SELECT * 
+  from todos
+  WHERE user_id = $1`,
+  [req.userId]);
 
   res.json(data.rows);
 });
 
+app.post('/api/todos', async(req, res) => {
+  console.log(req.userId);
+  const data = await client.query(`
+  INSERT INTO todos (task, priority_level, user_id)
+  VALUES ($1, $2, $3)
+  RETURNING *`,
+  [req.body.task, req.body.priority_level, req.userId]);
+
+  res.json(data.rows);
+});
+
+app.put('/api/todos/:id', async(req, res) => {
+  const data = await client.query(`
+  UPDATE todos
+  SET completed = true
+  WHERE id = $1 AND user_id = $2
+  RETURNING *`,
+  [req.params.id, req.userId]);
+  res.json(data.rows);
+});
 app.listen(PORT, () => {
   // eslint-disable-next-line no-console
   console.log(`Started on ${PORT}`);
